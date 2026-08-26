@@ -1,0 +1,28 @@
+# Local development stack: builds the bot image and runs it against a local
+# Postgres. Copy stack.env.example to stack.env and fill it in first.
+services:
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - stack.env
+    environment:
+      PERSONAL_ROLES_POSTGRES_HOST: postgres
+    volumes:
+      - bot-data:/app/data
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:18.4-alpine3.23
+    restart: unless-stopped
+    # POSTGRES_DB/USER/PASSWORD come from stack.env directly — compose ${…}
+    # interpolation reads .env/shell, not env_file.
+    env_file:
+      - stack.env
+    volumes:
+      - bot-postgres:/var/lib/postgresql
+
+volumes:
+  bot-data:
+  bot-postgres:
